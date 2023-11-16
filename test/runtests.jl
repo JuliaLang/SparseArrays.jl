@@ -1,10 +1,6 @@
 # This file is a part of Julia. License is MIT: https://julialang.org/license
 using Test, LinearAlgebra, SparseArrays
 
-if Base.get_bool_env("SPARSEARRAYS_AQUA_TEST", false)
-    include("ambiguous.jl")
-end
-
 for file in readlines(joinpath(@__DIR__, "testgroups"))
     file == "" && continue # skip empty lines
     include(file * ".jl")

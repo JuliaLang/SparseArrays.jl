@@ -8,22 +8,9 @@ original_env = copy(ENV)
 original_project = Base.active_project()
 ###
 
-import Pkg
-
-# Because julia CI doesn't run stdlib tests via `Pkg.test` test deps must be manually installed if missing
-if Base.find_package("Aqua") === nothing
-    @debug "Installing Aqua.jl for SparseArrays.jl tests"
-    iob = IOBuffer()
-    Pkg.activate(; temp = true)
-    try
-        # TODO: make this version tie to compat in Project.toml
-        # or do this another safer way
-        Pkg.add(name="Aqua", version="0.8", io=iob) # Needed for custom julia version resolve tests
-    catch
-        println(String(take!(iob)))
-        rethrow()
-    end
-end
+include("TestDepsUtils.jl")
+TestDepsUtils.install_all_test_deps(; force_install = true) # uncomment this line for debugging
+TestDepsUtils.install_all_test_deps()
 
 using Test, LinearAlgebra, SparseArrays, Aqua
 
@@ -46,7 +33,9 @@ using Test, LinearAlgebra, SparseArrays, Aqua
     @testset "Compat bounds" begin
         Aqua.test_deps_compat(SparseArrays)
     end
-
+    @testset "Project.toml formatting" begin
+        @test_skip Aqua.test_project_toml_formatting(SparseArrays)
+    end
     @testset "Piracy" begin
         @test_broken Aqua.Piracy.hunt(SparseArrays) == Method[]
     end
