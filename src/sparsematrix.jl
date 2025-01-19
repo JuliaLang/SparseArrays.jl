@@ -191,6 +191,30 @@ const SparseMatrixCSCColumnSubset{Tv,Ti} =
         Tuple{Base.Slice{Base.OneTo{Int}},I}} where {I<:AbstractVector{<:Integer}}
 const SparseMatrixCSCUnion2{Tv,Ti} = Union{AbstractSparseMatrixCSC{Tv,Ti}, SparseMatrixCSCColumnSubset{Tv,Ti}}
 
+"""
+    getcolptr(A::AbstractSparseMatrixCSC)
+
+Return a vector of column pointers of `A`. Any modifications to the returned
+vector will mutate `A` as well. Providing access to how the column pointers are
+stored internally can be useful in conjunction with  passing data to factorizations
+and preconditioners. See also [`rowvals`](@ref), [`nonzeros`](@ref) and [`nzrange`](@ref).
+
+# Examples
+```jldoctest
+julia> A = sparse(2I, 3, 3)
+3×3 SparseMatrixCSC{Int64, Int64} with 3 stored entries:
+ 2  ⋅  ⋅
+ ⋅  2  ⋅
+ ⋅  ⋅  2
+
+julia> getcolptr(A)
+4-element Vector{Int64}:
+ 1
+ 2
+ 3
+ 4
+```
+"""
 getcolptr(S::SorF)     = getfield(S, :colptr)
 getcolptr(S::SparseMatrixCSCView) = view(getcolptr(parent(S)), first(S.indices[2]):(last(S.indices[2]) + 1))
 getcolptr(S::SparseMatrixCSCColumnSubset) = error("getcolptr not well-defined for $(typeof(S))")
@@ -236,7 +260,7 @@ Return a vector of the structural nonzero values in sparse array `A`. This
 includes zeros that are explicitly stored in the sparse array. The returned
 vector points directly to the internal nonzero storage of `A`, and any
 modifications to the returned vector will mutate `A` as well. See
-[`rowvals`](@ref) and [`nzrange`](@ref).
+[`rowvals`](@ref), [`getcolptr`](@ref) and [`nzrange`](@ref).
 
 # Examples
 ```jldoctest
@@ -264,7 +288,7 @@ nonzeros(S::LowerTriangular{<:Any,<:SparseMatrixCSCUnion}) = nonzeros(S.data)
 Return a vector of the row indices of sparse array `A`. Any modifications to the returned
 vector will mutate `A` as well. Providing access to how the row indices are
 stored internally can be useful in conjunction with iterating over structural
-nonzero values. See also [`nonzeros`](@ref) and [`nzrange`](@ref).
+nonzero values. See also [`getcolptr`](@ref), [`nonzeros`](@ref) and [`nzrange`](@ref).
 
 # Examples
 ```jldoctest
