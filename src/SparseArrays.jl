@@ -22,7 +22,7 @@ import LinearAlgebra: mul!, ldiv!, rdiv!, cholesky, adjoint!, diag, eigen, dot,
 
 import Base: adjoint, argmin, argmax, Array, broadcast, circshift!, complex, Complex,
     conj, conj!, convert, copy, copy!, copyto!, count, diff, findall, findmax, findmin,
-    float, getindex, imag, inv, kron, kron!, length, map, maximum, minimum, permute!, real,
+    float, getindex, imag, inv, keytype, kron, kron!, length, map, maximum, minimum, permute!, real,
     rot180, rotl90, rotr90, setindex!, show, similar, size, sum, transpose,
     vcat, hcat, hvcat, cat, vec, reverse, reverse!
 
@@ -84,7 +84,8 @@ if Base.USE_GPL_LIBS
     include("solvers/spqr.jl")
 end
 
-zero(a::AbstractSparseArray) = spzeros(eltype(a), size(a)...)
+keytype(::Type{A}) where {Tv, Ti, A<:AbstractSparseArray{Tv,Ti}} = Ti
+zero(a::AbstractSparseArray) = spzeros(eltype(a), keytype(a), size(a)...)
 
 LinearAlgebra.diagzero(D::Diagonal{<:AbstractSparseMatrix{T}},i,j) where {T} =
     spzeros(T, size(D.diag[i], 1), size(D.diag[j], 2))

@@ -12,6 +12,7 @@ include("forbidproperties.jl")
 ### Data
 
 spv_x1 = SparseVector(8, [2, 5, 6], [1.25, -0.75, 3.5])
+spv_x1_32 = SparseVector(8, Int32[2, 5, 6], Float32[1.25, -0.75, 3.5])
 
 @test isa(spv_x1, SparseVector{Float64,Int})
 
@@ -40,6 +41,14 @@ x1_full[SparseArrays.nonzeroinds(spv_x1)] = nonzeros(spv_x1)
     y = SparseVector(8, Int8[4], [5.0])
     @test y isa SparseVector{Float64,Int8}
     @test @inferred size(y) == (@inferred(length(y))::Int8,)
+end
+
+@testset "Non default index type" begin
+    x = spv_x1_32
+    for func in [identity, copy, empty, similar, zero]
+        @test eltype(func(spv_x1_32)) == Float32
+        @test keytype(func(spv_x1_32)) == Int32
+    end
 end
 
 @testset "isstored" begin
